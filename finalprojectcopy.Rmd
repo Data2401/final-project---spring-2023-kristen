@@ -1,0 +1,494 @@
+---
+title: "World Happiness Report from year 2005-2021"
+output: slidy_presentation
+author: "Kristen Blessman-Garcia"
+date: "2023-04-27"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = F, message = F)
+data1 <- read.csv("C:\\Users\\diego\\Desktop\\data science folder\\World Happiness Report 2005-2021.csv", header=TRUE, stringsAsFactors=FALSE)
+```
+
+
+ 
+## Introduction
+The data is a CSV from Kaggle based on the Gallup World Poll/World Happiness Reports from 2005-2021.  It shows the national average response to a question of subjective well being.
+
+[World Happiness Report 2005-2021](https://www.kaggle.com/datasets/jahaidulislam/world-happiness-report-2005-2021)
+
+
+## Background/Why?
+I have practiced as an occupational therapy assistant for the past ten years and have an interest in the social/emotional well being of my clients. Also, my domain focus for data science is psychology so I wanted a relevant dataset.
+
+---
+
+## Problem Statement and Questions 
+
+- To understand global happiness trends and the factors contributing to well-being.  
+
+
+  - Which countries were in the top ten most frequently?
+  - Which countries had the lowest happiness score most frequently?
+  - How do the continents compare on their happiness score?
+  - Which factors are related to an increased score on the happiness          report?
+
+---
+
+## World Happiness Report is measured in Life.Ladder 
+
+Please imagine a ladder, with steps numbered from 10 at the top to 0 at the bottom.
+
+## Ten
+
+  - The top of the ladder represents the best possible life for you. 
+  -
+  -
+  -
+  -
+  -
+  - The bottom of the ladder represents the worst possible life for you.
+
+##  Zero
+
+---
+
+```{r}
+
+library(tidyverse)
+library(ggplot2)
+library(countrycode)
+
+```
+
+
+## What Libraries did you use?
+
+- library(tidyverse) #Use to tidy and filter the data with dplyr
+- library(ggplot2) #Use to draw plots
+- library(countrycode) #Use to categorize countries by continent
+
+
+---
+
+
+## Let's take a look at the unfiltered data 
+
+
+```{r}
+glimpse(data1)
+
+```
+ 
+  - Due to the length of the presentation and multiple columns, I will only explore the columns of: Confidence in national government, perceptions of corruption, life expectancy, GDP, social support and freedom to make life choices. 
+
+---
+
+## Data Key Terms and Categories
+
+- GDP per capita- (variable name gdp) Gross Domestic Product
+
+- Healthy life expectancies at birth are based
+on the data extracted from the World Health Organization's (WHO) Global
+Health Observatory data repository
+
+Binary Responses:
+
+- Perception of corruption- "Is corruption widespread within businesses/
+government or not?"
+
+- Confidence in the national government- "Do you have confidence in your national government?"
+
+- Social support- "If you were in trouble, do you have relatives or friends you can count on to help you?"
+
+- Freedom to make life choices- "Are you satisfied with your freedom to choose what you do with your life?"
+
+---
+
+## Missing Data
+
+  - Compared to the large dataset of 2089 rows, the amount of missing values were negligible.
+  
+```{r missing, echo=TRUE}
+
+sapply(data1, function(x) sum(is.na(x)))
+```
+
+- I used na.omit() to remove the missing values.
+
+
+```{r}
+
+
+lowest_2008 = data1 %>%   select(Country.Name, Year, Life.Ladder) %>% 
+  filter(Year == 2008) %>% slice_min(Life.Ladder, n=10)
+
+
+```
+
+---
+
+## Let's Filter the data to a particular year and find the countries with the max happiness score
+
+```{r}
+top_2008 = data1 %>%   select(Country.Name, Year, Life.Ladder) %>% 
+  filter(Year == 2008) %>% slice_max(Life.Ladder, n=10) 
+
+
+```
+
+
+```{r}
+top_2008_plot= ggplot(top_2008, aes(reorder(Country.Name, Life.Ladder),Life.Ladder,fill=Country.Name)) + geom_col()+ theme(axis.text.x = element_text(angle=45))+
+  ggtitle("Top ten in 2008")+xlab("Country")
+top_2008_plot
+```
+
+
+- This plot is interesting, however it only shows the results from one year.  Let's filter the data again to look at the max encompassing all of the years. 
+
+
+
+```{r }
+# leave off presentation for time
+lowest_2008_plot= ggplot(lowest_2008, aes(reorder(Country.Name, Life.Ladder),Life.Ladder,fill=Country.Name)) + geom_col()+ theme(axis.text.x = element_text(angle=45))+ggtitle("Lowest Life.Ladder scores in 2008")+xlab("Country")
+
+
+
+ 
+```
+
+---
+
+
+## The countries with the highest happiness scores most frequently
+
+```{r}
+
+
+top = data1 %>%  select(Country.Name, Year, Life.Ladder) %>% 
+  group_by(Year) %>% 
+  slice_max(Life.Ladder, n=10)
+
+top_all_years=top %>% group_by(Country.Name) %>% 
+  count(Country.Name) %>% arrange(desc(n)) %>% filter(n > 8)
+
+most_times_top_10_plot= ggplot(top_all_years, 
+  aes(reorder(Country.Name, n),n,fill= n))  + geom_col()+
+  theme(axis.text.x = element_text(angle=45))+
+  ggtitle("Countries that made the Top Ten Most Frequently")+
+  xlab("Country")+ ylab('Number of Times')
+most_times_top_10_plot
+
+
+
+```
+
+---
+
+```{r}
+low = data1 %>%  select(Country.Name, Year, Life.Ladder) %>% 
+  #group_by(Country.Name) %>% 
+  slice_min(Life.Ladder, n=10)
+
+```
+
+
+```{r}
+low_all_years= low %>% group_by(Country.Name) %>% 
+  count(Country.Name) %>% arrange(desc(n)) 
+
+```
+
+
+
+
+## The countries with the lowest happiness scores most frequently
+
+```{r}
+most_times_low_10_plot= ggplot(low_all_years, 
+  aes(reorder(Country.Name, n),n,fill= n))  + geom_col()+
+  theme(axis.text.x = element_text(angle=45))+
+  ggtitle("Countries that had the Lowest Happiness Score Most Frequently")+
+  xlab("Country")+ ylab('Number of Times')
+most_times_low_10_plot
+
+```
+
+
+- Next, Let's start exploring some factors that might influence the happiness score.
+
+---
+
+- Let's see if there is a relationship between having confidence in the national government and overall well-being.
+
+```{r}
+overall <- ggplot(data1, aes(Confidence.in.national.government, Life.Ladder, color = Life.Ladder, size = Life.Ladder)) + geom_point(alpha=1/3,size = 1)+ geom_smooth()
+overall
+```
+
+- This chart is overplotted and it is difficult to see a 
+clear relationship.  
+- Let's filter the data to different years to make it more clear.
+
+---
+
+
+```{r}
+
+year_data=data1 %>% filter(Year == 2005|Year == 2010|Year == 2015|Year == 2020) %>% 
+  select(Country.Name,
+         Life.Ladder,Confidence.in.national.government,Year) #%>%   slice_max(Confidence.in.national.government, n =12) 
+
+
+
+```
+
+
+
+
+
+```{r}
+
+low_govt = data1 %>% filter(Year == 2021) %>% 
+  select(Country.Name,
+         Life.Ladder,Confidence.in.national.government,Year) %>% slice_min(Confidence.in.national.government, n =30) 
+
+```
+
+
+## Here is a facet_wrap plot showing the relationship between  confidence in the Govt and happiness score on 5 year intervals
+    
+
+```{r}
+
+govt_plot <- ggplot(year_data, aes(Confidence.in.national.government, Life.Ladder, fill = Life.Ladder)) + geom_smooth() + 
+facet_wrap(~Year)
+govt_plot
+```
+
+
+
+
+
+
+```{r warning=FALSE}
+low <- ggplot(low_govt, aes(Confidence.in.national.government, Life.Ladder, color = Life.Ladder, size = 4)) + geom_point()
+
+```
+
+- Next up is the perception of corruption.
+
+---
+
+
+## Bolivia & USA
+
+- I have heard that there is a high perception of corruption in Bolivia.  I wanted to explore the relationship with a plot.
+
+
+```{r}
+
+US_Bolivia = data1 %>% filter(Country.Name == 'Bolivia'|Country.Name == 'United States')
+Bolivia_corruption_plot = ggplot(US_Bolivia,aes(Perceptions.of.corruption, Life.Ladder,color=Country.Name, size= 3))+geom_point()
+Bolivia_corruption_plot
+```
+- Next we will look at life expectancy.
+
+---
+
+
+## Does healthy Life Expectancy have a relationship with Well-Being?
+
+- Let's explore a violin plot between Kenya, India, Mexico, and Finland.
+
+```{r}
+
+Kenya_Finland = data1 %>% filter(Country.Name == 'Kenya'|Country.Name == 'Finland'|Country.Name == 'Mexico'|Country.Name=='India')
+Kenya_lifeexp_plot = ggplot(Kenya_Finland,aes(Healthy.life.expectancy.at.birth,
+ Life.Ladder, fill = Country.Name))+geom_violin(scale='width', alpha=2/3)+
+  ggtitle("Life Expectancy and Happiness scores")
+Kenya_lifeexp_plot
+
+```
+
+
+-Let's take a look at happiness in each continent.
+
+---
+
+# The original dataset did not have a category for continent, however RStudio has a library called countrycode which can be used to categorize by continent.  
+- It uses the five continent model:
+
+
+```{r Continent Code, echo=TRUE}
+
+##Five Continent Model
+
+data1$Continent <- countrycode(sourcevar = data1$Country.Name,
+                             origin = "country.name",
+                             destination = "continent")
+
+data1$Continent[data1$Country.Name == "Kosovo"] = "Europe"
+ 
+by_continent = data1 %>% select(Country.Name,Continent, Life.Ladder) %>% arrange(Continent) %>% group_by(Continent)
+
+```
+
+---
+
+
+
+## Continent DataFrame
+
+- a dataframe showing the Life.Ladder for each continent
+    - average 
+    - max 
+    - min 
+
+```{r}
+by_continent = data1 %>% select(Country.Name,Continent, Life.Ladder) %>% arrange(Continent) %>% group_by(Continent) %>% summarize(avg = mean(Life.Ladder),max=max(Life.Ladder),min = min(Life.Ladder))
+by_continent
+```
+
+- Something doesn't look right with Oceania, let's take a closer look on the next slide. 
+
+---
+
+
+## Because of the closeness in Oceania's numbers, let's take a closer look at Oceania to see which countries it represents in this dataset.
+
+```{r Oceania, echo=TRUE}
+Oceania =data1 %>% filter(Continent == 'Oceania') %>% count(Country.Name)
+Oceania
+```
+
+
+- Now we know it only represents two countries. The 15 represents the number of years.
+
+---
+
+
+
+## Average happiness score by Continent
+
+```{r}
+
+continent_plot= ggplot(by_continent, 
+  aes(reorder(Continent, avg), avg,fill= 'orange'))  + geom_col()+
+  theme(axis.text.x = element_text(angle=45))+
+  ggtitle("Comparison of Average Life.Ladder by Continent")+
+  xlab("Continent")+ ylab('Happiness (Life.Ladder)')
+continent_plot
+  
+```
+
+
+
+
+
+
+
+```{r}
+continent_plot= ggplot(by_continent, 
+  aes(Continent, max,fill=max))  + geom_col()+
+  theme(axis.text.x = element_text(angle=45))+
+  ggtitle("Comparison of Max Life.Ladder by Continent")+
+  xlab("Continent")+ ylab('Happiness (Life.Ladder)')
+
+```
+
+
+
+
+
+
+```{r}
+continent_plot= ggplot(by_continent, 
+  aes(Continent, min,fill=min))  + geom_col()+
+  theme(axis.text.x = element_text(angle=45))+
+  ggtitle("Comparison of Min Life.Ladder by Continent")+
+  xlab("Continent")+ ylab('Happiness (Life.Ladder)')
+
+```
+
+
+
+---
+
+```{r}
+gdp_ = data1 %>%  select(Country.Name, Year, Life.Ladder,Log.GDP.per.capita) %>% 
+  group_by(Year) %>% 
+  arrange(desc(Log.GDP.per.capita)) %>% 
+  filter(Year==2019|Country.Name=='United States')
+
+```
+
+## Filter the data and compare the United States GDP to Life.Ladder
+
+
+```{r message=FALSE, warning=FALSE}
+gdp_plot= ggplot(gdp_, aes(Life.Ladder, Log.GDP.per.capita, fill=Log.GDP.per.capita))  + 
+  geom_point() + 
+  geom_smooth() +
+  theme(axis.text.x = element_text(angle=15))+
+  ggtitle("United States: Happiness score versus GDP")+
+  xlab("Happiness (Life.Ladder)") + ylab('GDP')
+gdp_plot
+
+
+```
+
+- According to the data, happiness generally increases with GDP.
+
+
+---
+
+# This dataframe shows the relationship between social support and the feeling of well-being.
+
+  - Social support- "If you were in trouble, do you have relatives or friends you can count on to help you?"
+
+```{r}
+Social_Support = data1 %>% na.omit() %>% select(Country.Name,Continent, Life.Ladder, Social.support) %>% arrange(Continent) %>% group_by(Continent) %>% summarize(avg_social_support = mean(Social.support),median_life_ladder=median(Life.Ladder)) %>% arrange(avg_social_support)
+Social_Support
+```
+
+---
+
+
+## A box plot of each Continent showing social support on the x-axis and life ladder on the y-axis
+
+
+```{r warning=FALSE}
+data1 %>% 
+  ggplot(mapping = aes(x = Social.support, y = Life.Ladder, fill = Continent)) +
+  geom_boxplot()+facet_wrap(~Continent)+ggtitle("Social Support and a feeling of well-being")
+
+
+```
+
+
+---
+
+
+Let's explore one more category: Freedom to make life choices.
+
+- Freedom to make life choices- "Are you satisfied with your freedom to choose what you do with your life?"
+
+```{r}
+data1 %>% na.omit() %>% 
+  ggplot(mapping = aes(x = Freedom.to.make.life.choices,
+                       y = Life.Ladder,alpha=.1
+                       ,color='red')) +
+  geom_point()+facet_wrap(~Continent)
+
+```
+
+---
+
+## Summary
+
+
+    In analyzing the results we discovered a trend that the Nordic countries of Finland, Denmark, Sweden and Norway were in the top ten the most frequently.  The Middle Eastern countries of Lebanon and Afghanistan had the lowest happiness scores the most frequently.  We found a positive, increasing, relationship with GDP, Life Expectancy, Social Support, and the Freedom to make life choices.  There was a negative relationship with one factor. As perception of corruption increased, the happiness scores decreased.  The data did not demonstrate a clear relationship between confidence in the national government and well-being. 
+    
+    Some important things to consider are that the poll results are subjective and could be swayed by cultural norms. Some people don't feel comfortable rating their government or freedoms.  Another thing to consider is that the poll is largely taken over the telephone and it is not clear if the homeless, prisoners, and nursing home residents were able to be reached. 
