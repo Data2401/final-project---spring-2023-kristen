@@ -35,7 +35,6 @@ The data is a CSV from Kaggle based on the Gallup World Poll/World Happiness Rep
   - Which countries had the lowest average happiness score?
   - How do the continents compare on their happiness score?
   - Which factors are related to an increased score on the happiness          report?
-
 - Background/Why?
     - I have practiced as an occupational therapy assistant for the past ten years and have an interest in the social/emotional well being of my clients. Also, my domain focus for data science is psychology so I wanted a relevant dataset.
 
@@ -330,9 +329,9 @@ There doesn't appear to be a clear relationship between confidence in the nation
 - Next up is a different variable: the perception of corruption.
 
 
-### Perceptions of corruption and general well being:
+### Is a Perception of corruption related to general well being?:
 
-### Bolivia,  USA, and Denmark
+###  Bolivia,  USA, and Denmark
 
 Respondents answered the binary question of: "Is corruption widespread within businesses/government or not?"
 
@@ -437,6 +436,7 @@ continent_plot
   
 ```
 
+- We realized earlier that Oceania's scores are not very relevant since they only represent two countries.  Europe comes in second place which shows that it represents a broad amount of countries.  Some of the European countries are in the top ten consistently. Africa has the lowest happiness score ratings which was represented in the lowest average plot.
 
 
 ### GDP
@@ -521,7 +521,7 @@ data1 %>%
 ## Summary
 
 
- -   In analyzing the results we discovered a trend that the Nordic countries of Finland, Denmark, Switzerland and Norway had the highest average happiness scores.  The countries of South Sudan and Afghanistan had the lowest average happiness scores.  We found a positive, increasing, relationship with GDP, Life Expectancy, Social Support, and the Freedom to make life choices.  There was a negative relationship with one factor. As perception of corruption increased, the happiness scores decreased.  The data did not demonstrate a clear relationship between confidence in the national government and well-being. 
+ -   In analyzing the results we discovered a trend that the Nordic countries of Finland, Denmark, Switzerland and Norway had the highest average happiness scores.  The countries of South Sudan and Afghanistan had the lowest average happiness scores. We saw a plot of happiness scores related to continents and arranged them in ascending order. We found a positive, increasing, relationship with GDP, Life Expectancy, Social Support, and the Freedom to make life choices.  There was a negative relationship with one factor. As perception of corruption increased, the happiness scores decreased.  The data did not demonstrate a clear relationship between confidence in the national government and well-being. 
     
  -   Some important things to consider are that the poll results are subjective and could be swayed by cultural norms. Some people don't feel comfortable rating their government or freedoms.  Another thing to consider is that the poll is largely taken over the telephone and it is not clear if the homeless, prisoners, and nursing home residents were able to be reached. 
     
